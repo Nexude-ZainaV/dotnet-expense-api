@@ -1,0 +1,29 @@
+# Requests for the VS Code REST Client extension or Visual Studio / Rider .http support.
+@base = http://localhost:5082
+
+### Health
+GET {{base}}/health
+
+### Create an expense
+POST {{base}}/api/expenses
+Content-Type: application/json
+
+{ "description": "Groceries", "amount": 42.50, "category": "Food", "spentOn": "2026-09-03" }
+
+### List (filters and paging are optional)
+GET {{base}}/api/expenses?category=food&from=2026-09-01&to=2026-09-30&page=1&pageSize=20
+
+### Get one
+GET {{base}}/api/expenses/1
+
+### Update
+PUT {{base}}/api/expenses/1
+Content-Type: application/json
+
+{ "description": "Groceries (weekly)", "amount": 55.00, "category": "food", "spentOn": "2026-09-03" }
+
+### Monthly summary (defaults to the current month)
+GET {{base}}/api/expenses/summary
+
+### Delete
+DELETE {{base}}/api/expenses/1
