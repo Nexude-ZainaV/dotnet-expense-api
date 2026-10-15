@@ -1,3 +1,4 @@
+// Test host shared by the integration tests. Run the suite with: dotnet test
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.Sqlite;

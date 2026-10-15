@@ -1,3 +1,4 @@
+// Size and paging limits, kept in one place so the schema and the validator can't drift apart.
 namespace ExpenseTracker.Api.Data;
 
 /// <summary>Validation limits shared by the database schema and the request validator.</summary>

@@ -1,3 +1,5 @@
+// Entry point: registers services, sets up middleware and maps the routes.
+// Run with: dotnet run --project src/ExpenseTracker.Api
 using ExpenseTracker.Api.Data;
 using ExpenseTracker.Api.Expenses;
 using Microsoft.EntityFrameworkCore;

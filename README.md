@@ -5,9 +5,9 @@
 ![EF Core](https://img.shields.io/badge/EF%20Core-SQLite-003B57?logo=sqlite)
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)
 
-A REST API for recording expenses and reporting monthly totals per category. Built
-with ASP.NET Core minimal APIs and Entity Framework Core on SQLite, covered by
-in-memory integration tests that exercise the real HTTP pipeline.
+A REST API for recording expenses and getting monthly totals per category. It uses
+ASP.NET Core minimal APIs and Entity Framework Core on SQLite. The tests boot the
+whole app in memory and go through the real HTTP pipeline.
 
 ## Endpoints
 
@@ -22,7 +22,7 @@ in-memory integration tests that exercise the real HTTP pipeline.
 | `GET` | `/health` | Liveness check |
 | `GET` | `/openapi/v1.json` | OpenAPI document (Development only) |
 
-Invalid input returns `400` with an RFC 9457 `ValidationProblemDetails` body:
+Bad input gets a `400` with an RFC 9457 `ValidationProblemDetails` body:
 
 ```json
 {
@@ -32,34 +32,35 @@ Invalid input returns `400` with an RFC 9457 `ValidationProblemDetails` body:
 }
 ```
 
-Ready-made requests are in [docs/expenses.http](docs/expenses.http).
+There are ready-made requests in [docs/expenses.http](docs/expenses.http).
 
 ## Design decisions
 
-- **Money is stored as integer cents.** `decimal` in the API, `long` in the database:
-  no floating-point drift, and SQLite sums and sorts integers natively.
+- Money is stored as integer cents: `decimal` in the API, `long` in the database.
+  That avoids floating-point drift, and SQLite can sum and sort integers natively.
   Conversion rounds half away from zero (`Money.ToCents`).
-- **Aggregation happens in SQL.** The summary uses `GroupBy` + `Sum`, which EF Core
-  translates to `GROUP BY`, so only one row per category leaves the database.
-- **Typed results** (`Results<Ok<T>, NotFound, ValidationProblem>`) make every
-  endpoint's possible responses visible in its signature and in the OpenAPI document.
-- **Injectable clock.** `TimeProvider` is registered in DI, so tests pin "today" and
-  the "current month" default is deterministic.
-- **Indexes match the queries**: `(Category, SpentOn)` and `SpentOn`.
-- `ExecuteDeleteAsync` deletes with one SQL statement instead of load-then-remove.
-- The schema is created with `EnsureCreated()` to keep the demo one command to run;
-  a production service would ship EF Core migrations.
+- The summary is aggregated in SQL. `GroupBy` + `Sum` turns into a `GROUP BY`, so
+  only one row per category comes back from the database.
+- I used typed results (`Results<Ok<T>, NotFound, ValidationProblem>`) so each
+  endpoint's possible responses show up in its signature and in the OpenAPI document.
+- The clock is injectable. `TimeProvider` is registered in DI, which lets the tests
+  pin "today" and makes the "current month" default deterministic.
+- The indexes match the queries: `(Category, SpentOn)` and `SpentOn`.
+- Delete uses `ExecuteDeleteAsync`, which is one SQL statement instead of
+  load-then-remove.
+- The schema comes from `EnsureCreated()` so the demo runs with one command. A real
+  service would ship EF Core migrations instead.
 
 ## Run it
 
-Requires the [.NET 10 SDK](https://dotnet.microsoft.com/download).
+You need the [.NET 10 SDK](https://dotnet.microsoft.com/download).
 
 ```bash
 dotnet run --project src/ExpenseTracker.Api
 # listening on http://localhost:5082
 ```
 
-Tests (integration tests use `WebApplicationFactory` and a throwaway SQLite file per test):
+Tests (the integration tests use `WebApplicationFactory` and a throwaway SQLite file per test):
 
 ```bash
 dotnet test

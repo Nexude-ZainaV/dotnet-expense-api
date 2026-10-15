@@ -1,3 +1,4 @@
+// The Expense entity, mapped by EF Core to the Expenses table.
 namespace ExpenseTracker.Api.Data;
 
 /// <summary>

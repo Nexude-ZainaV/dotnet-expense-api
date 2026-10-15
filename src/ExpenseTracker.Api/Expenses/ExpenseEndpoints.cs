@@ -1,3 +1,4 @@
+// Route handlers for /api/expenses: CRUD, the filtered list and the monthly summary.
 using ExpenseTracker.Api.Data;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
@@ -25,11 +26,13 @@ public static class ExpenseEndpoints
         ExpenseDbContext db, string? category, DateOnly? from, DateOnly? to,
         int page = 1, int pageSize = Limits.DefaultPageSize, CancellationToken ct = default)
     {
+        // Clamp instead of rejecting, so a bad page number still gets a sensible page.
         page = Math.Max(page, 1);
         pageSize = Math.Clamp(pageSize, 1, Limits.MaxPageSize);
 
         var query = Filter(db.Expenses.AsNoTracking(), category, from, to);
         var total = await query.CountAsync(ct);
+        // Id breaks ties between same-day rows, so paging order is stable.
         var items = await query
             .OrderByDescending(e => e.SpentOn).ThenByDescending(e => e.Id)
             .Skip((page - 1) * pageSize).Take(pageSize)
@@ -58,6 +61,7 @@ public static class ExpenseEndpoints
             .Select(g => new { Category = g.Key, Cents = g.Sum(e => e.AmountCents), Count = g.Count() })
             .ToListAsync(ct);
 
+        // Biggest category first; name breaks ties so the order is deterministic.
         var byCategory = rows
             .OrderByDescending(r => r.Cents).ThenBy(r => r.Category)
             .Select(r => new CategoryTotal(r.Category, Money.FromCents(r.Cents), r.Count))
@@ -101,6 +105,7 @@ public static class ExpenseEndpoints
         if (errors.Count > 0)
             return TypedResults.ValidationProblem(errors);
 
+        // PUT replaces every field. The entity is tracked, so SaveChanges writes the update.
         var expense = await db.Expenses.FindAsync([id], ct);
         if (expense is null)
             return TypedResults.NotFound();
@@ -121,6 +126,7 @@ public static class ExpenseEndpoints
         return deleted == 0 ? TypedResults.NotFound() : TypedResults.NoContent();
     }
 
+    // Shared WHERE clauses for List and Summary. Only builds the query; nothing runs until it's awaited.
     private static IQueryable<Expense> Filter(IQueryable<Expense> query, string? category, DateOnly? from, DateOnly? to)
     {
         if (!string.IsNullOrWhiteSpace(category))

@@ -1,3 +1,4 @@
+// Unit tests for the dollars/cents conversion. Run with: dotnet test
 using ExpenseTracker.Api.Expenses;
 
 namespace ExpenseTracker.Api.Tests;

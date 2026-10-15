@@ -1,3 +1,4 @@
+// HTTP-level tests for every expense endpoint. Run with: dotnet test
 using System.Net;
 using System.Net.Http.Json;
 using ExpenseTracker.Api.Expenses;
@@ -5,8 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ExpenseTracker.Api.Tests;
 
-// Each test class gets a fresh factory (and database) because xUnit creates a new
-// instance per test; IDisposable tears it down afterwards.
+// xUnit creates a new instance of this class per test, so every test gets its own
+// factory and database. Dispose tears them down afterwards.
 public sealed class ExpenseEndpointTests : IDisposable
 {
     private readonly ExpenseApiFactory _factory = new();
@@ -20,6 +21,7 @@ public sealed class ExpenseEndpointTests : IDisposable
         _factory.Dispose();
     }
 
+    // Seeds one expense through the API and returns what it created.
     private async Task<ExpenseResponse> CreateAsync(string description, decimal amount, string category, string spentOn)
     {
         var response = await _client.PostAsJsonAsync("/api/expenses",

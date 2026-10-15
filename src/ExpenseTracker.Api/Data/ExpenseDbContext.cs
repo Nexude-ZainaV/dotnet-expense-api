@@ -1,3 +1,4 @@
+// EF Core context: the Expenses table, its column lengths and its indexes.
 using Microsoft.EntityFrameworkCore;
 
 namespace ExpenseTracker.Api.Data;

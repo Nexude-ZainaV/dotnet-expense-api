@@ -1,9 +1,10 @@
+// Request and response shapes for the expense endpoints.
+// The API speaks decimal dollars; the database stores cents.
 using ExpenseTracker.Api.Data;
 
 namespace ExpenseTracker.Api.Expenses;
 
-// Request and response shapes. The API speaks decimal dollars; the database stores cents.
-
+// Nullable on purpose: ExpenseValidator turns a missing field into a 400 field error.
 public sealed record ExpenseRequest(string? Description, decimal Amount, string? Category, DateOnly? SpentOn);
 
 public sealed record ExpenseResponse(int Id, string Description, decimal Amount, string Category, DateOnly SpentOn)

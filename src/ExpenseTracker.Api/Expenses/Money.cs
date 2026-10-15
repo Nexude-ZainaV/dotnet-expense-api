@@ -1,3 +1,4 @@
+// Converts between decimal dollars (API) and whole cents (database).
 namespace ExpenseTracker.Api.Expenses;
 
 public static class Money

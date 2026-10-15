@@ -1,3 +1,4 @@
+// Field validation for create and update requests, plus category normalisation.
 using ExpenseTracker.Api.Data;
 
 namespace ExpenseTracker.Api.Expenses;
@@ -19,6 +20,7 @@ public static class ExpenseValidator
 
         if (request.Amount <= 0 || request.Amount > Limits.MaxAmount)
             errors["amount"] = [$"Amount must be greater than 0 and at most {Limits.MaxAmount:N0}."];
+        // Rounding to 2 places changes the value only if it had more than 2 decimals.
         else if (decimal.Round(request.Amount, 2) != request.Amount)
             errors["amount"] = ["Amount can have at most 2 decimal places."];
 
